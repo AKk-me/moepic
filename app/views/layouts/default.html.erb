@@ -1,0 +1,60 @@
+<% content_for :content do %>
+  <%= render 'layouts/news' %>
+  <div id="header">
+    <div id="title"><h2 id="site-title"><%= link_to image_tag('logo_small.png', :alt => CONFIG['app_name'], :size=> '484x75', :id => 'logo'), CONFIG['url_base'] %><span><%= tag_header(params[:tags]) %></span></h2></div>
+    <%= render :partial => "layouts/menu" %>
+  </div>
+  <%= render :partial => "layouts/login" %>
+
+  <% if CONFIG["server_host"] == "yande.re" %>
+    <%# This is actually just to keyword "image board" and "danbooru" for searches like
+        "tinkle danbooru".  Be careful, this looks very stupid in search results if taken
+        too far: "Sex hentai porn danbooru image board"; this should hint search engines,
+        not spam them. %>
+    <div style="display: none;">Danbooru-based image board with a specialization in high-quality images.</div>
+  <% end %>
+
+  <!--[if lt IE 7]>
+  <div style="display: none;" id="old-browser"><%= t('.old_browser.info') %>
+    <%= t('.old_browser.suggestion') %>:
+    <a href="http://www.mozilla.com/firefox/">Firefox</a>,
+    <a href="http://www.opera.com/">Opera</a>,
+    <a href="http://www.microsoft.com/windows/internet-explorer/download-ie.aspx">Internet Explorer</a>.
+    <div style="text-align: right;" id="old-browser-hide">
+      <a href="#" onclick='$("old-browser").hide(); Cookie.put("hide-ie-nag", "1");'><%= t('.old_browser.hide') %></a>
+    </div>
+  </div>
+  <![endif]-->
+  <%= render :partial => "layouts/notice" %>
+
+  <div class="blocked" id="block-reason" style="display: none;">
+  </div>
+
+  <div id="content">
+    <%= yield %>
+    <% if content_for? :subnavbar %>
+      <div class="footer">
+        <%= yield :above_footer %>
+        <ul class="flat-list" id="subnavbar">
+          <%= yield :subnavbar %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+
+  <script type="text/javascript">
+    InitTextAreas();
+    InitAdvancedEditing();
+    Post.InitBrowserLinks();
+    if(TagCompletion)
+      TagCompletion.init(<%= json_escape Tag.get_summary_version.to_json.html_safe %>);
+  </script>
+
+  <!--[if lt IE 7]>
+    <script type="text/javascript">
+      if(Cookie.get("hide-ie-nag") != "1")
+        $("old-browser").show();
+    </script>
+  <![endif]-->
+<% end %>
+<%= render :template => 'layouts/application' %>

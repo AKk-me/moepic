@@ -1,0 +1,53 @@
+<h4><%=t :user_invites %></h4>
+<p><%=t :user_invites_text %></p>
+
+<div style="margin-bottom: 2em">
+  <h6><%=t :user_invites2 %></h6>
+  <%= form_tag({:action => "invites"}, :onsubmit => "return confirm('#{t(:user_invites_text2 )}' + $F('user_name') + '?')") do %>
+    <table width="100%">
+      <tfoot>
+        <tr>
+          <td colspan="2"><%= submit_tag t(:user_submit) %></td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <tr>
+          <td><label for="member_name"><%=t :user_name %></label></td>
+          <td>
+            <%= text_field "member", "name", :class => 'ac-user-name' %>
+          </td>
+        </tr>
+        <tr>
+          <td><label for="member_level"><%=t :user_level %></label></td>
+          <td><%= select "member", "level", [["Contributor", CONFIG["user_levels"]["Contributor"]], ["Privileged", CONFIG["user_levels"]["Privileged"]]] %></td>
+        </tr>
+      </tbody>
+    </table>
+  <% end %>
+</div>
+
+<div>
+  <h6><%=t :user_current_invites %></h6>
+  <p><%=t :user_current_invites_text %></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th><%=t :user_user %></th>
+        <th><%=t :users_posts %></th>
+        <th><%=t :user_fav %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @invited_users.each do |user| %>
+        <tr>
+          <td><%= link_to h(user.pretty_name), :controller => "user", :action => "show", :id => user.id %></td>
+          <td><%= link_to Post.count(:conditions => "user_id = #{user.id}"), :controller => "post", :action => "index", :tags => "user:#{user.name}" %></td>
+          <td><%= link_to user.post_votes.where(:score => 3).count, :controller => '/post', :action => :index, :tags => "vote:3:#{user.name} order:vote" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%= render :partial => "footer" %>

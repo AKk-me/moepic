@@ -1,0 +1,55 @@
+<% provide :title, t('.title') %>
+<div id="artist-index">
+  <div id="search-form" style="margin-bottom: 1em;">
+    <%= form_tag({ :action => :index }, :method => :get) do %>
+      <%= text_field_tag 'name', params[:name], :size => 40 %> <%= submit_tag t('.search') %>
+      <br />
+      <%= select_tag 'order', options_for_select([[t('.name'), 'name'], [t('.date'), 'date']],[params[:order] || '']) %>
+    <% end %>
+  </div>
+
+  <% if @artists.any? %>
+    <table class="highlightable" width="100%">
+      <thead>
+        <tr>
+          <th width="5%"></th>
+          <th width="35%"><%= t('.name') %></th>
+          <th width="50%"><%= t('.updated_by') %></th>
+          <th width="10%"><%= t('.last_modified') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @artists.each do |artist| %>
+          <%= content_tag :tr, :class => cycle('even', 'odd'), :id => "artist-#{artist.id}" do %>
+            <td>
+              <%= link_to_unless artist.alias_id, 'P', { :controller => '/post', :action => :index, :tags => artist.name }, :title => t('.find') %>
+              <%= link_to 'E', { :action => :update, :id => artist.id }, :title => t('.edit') %>
+              <%= link_to 'D', { :action => :destroy, :id => artist.id }, :title => t('.delete') %>
+            </td>
+            <td>
+              <%= link_to artist.name, { :action => :show, :id => artist.id } %>
+              <% if artist.alias_id %>
+                &rarr; <%= link_to artist.alias_name, { :action => :show, :id => artist.alias_id }, :title => t('.is_alias') %>
+              <% end %>
+              <% if artist.group_id %>
+                [<%= link_to artist.group_name, { :action => :show, :id => artist.group_id }, :title => t('.is_group') %>]
+              <% end %>
+            </td>
+            <% if artist.updater_id %>
+              <td><%= User.find_name(artist.updater_id) %></td>
+            <% else %>
+              <td></td>
+            <% end %>
+            <td><%= artist.updated_at.strftime '%b %d %Y, %H:%M' %></td>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <div id="paginator">
+    <%= will_paginate @artists %>
+  </div>
+
+  <%= render :partial => 'footer' %>
+</div>

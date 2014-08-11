@@ -1,0 +1,9 @@
+<% provide :title, t('.title') %>
+<h3><%= t('.title') %></h3>
+
+<%= form_tag(:action => "destroy") do %>
+  <p><%= t('.confirm', :name => @pool.pretty_name) %></p>
+  <%= submit_tag t('buttons._yes') %> <%= button_to_function t('buttons._no'), "history.back()" %>
+<% end %>
+
+<%= render :partial => "footer" %>

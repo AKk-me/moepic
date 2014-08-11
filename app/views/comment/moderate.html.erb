@@ -1,0 +1,46 @@
+<% provide :title, t('.title') %>
+<script type="text/javascript">
+  function highlight_row(checkbox) {
+    var row = checkbox.parentNode.parentNode
+    if (row.original_class == null) {
+      row.original_class = row.className
+    }
+
+    if (checkbox.checked) {
+      row.className = "highlight"
+    } else {
+      row.className = row.original_class
+    }
+  }
+</script>
+
+<%= form_tag url_for(:controller => "/comment", :action => :moderate) do %>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th><%= t('.author') %></th>
+        <th><%= t('.body') %></th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <td colspan="3">
+          <%= button_to_function t('.select_all'), "$$('.c').each(function (i) {i.checked = true; highlight_row(i)}); return false" %>
+          <%= button_to_function t('.select_invert'), "$$('.c').each(function (i) {i.checked = !i.checked; highlight_row(i)}); return false" %>
+          <%= submit_tag t('.approve') %>
+          <%= submit_tag t('.delete') %>
+        </td>
+      </tr>
+    </tfoot>
+    <tbody>
+      <% @comments.each do |c| %>
+        <tr>
+          <td><input type="checkbox" class="c" name="c[<%= c.id %>]" onclick="highlight_row(this)"></td>
+          <td><%= link_to h(c.author), :controller => "post", :action => "show", :id => c.post_id %></td>
+          <td><%= h(c.body) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

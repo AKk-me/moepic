@@ -1,0 +1,37 @@
+<div>
+  <% if posts.empty? %>
+    <p><%= t('.empty') %></p>
+  <% else %>
+    <ul id="post-list-posts">
+    <% posts.each do |post| -%>
+      <%= print_preview(post, :similarity=>(@similar[:similarity][post] rescue nil), :blacklisting => true, :disable_jpeg_direct_links => (not @similar.nil?)) -%>
+    <%- end -%>
+    </ul>
+  <% end %>
+</div>
+
+<%# Make sure this is done early, as lots of other scripts depend on this registration. %>
+<% content_for_prefix :post_cookie_javascripts do %>
+  <script type="text/javascript">
+    <% if @posts %>
+      Post.register_tags(<%= json_escape Tag.batch_get_tag_types_for_posts(@posts).to_json.html_safe %>);
+    <% end %>
+    <% posts.each do |post| %>
+      <% if not post.is_a?(ExternalPost) then %>
+        Post.register(<%= json_escape post.to_json.html_safe %>)
+      <% end %>
+    <% end %>
+  </script>
+<% end %>
+
+<% content_for :post_cookie_javascripts do %>
+  <script type="text/javascript">
+    var blacklist_options = {};
+    <% if @search_id %>
+      blacklist_options.exclude = <%= json_escape @search_id.to_json.html_safe %>;
+    <% end %>
+    Post.init_blacklisted(blacklist_options)
+
+    Post.init_post_list();
+  </script>
+<% end %>

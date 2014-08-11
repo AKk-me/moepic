@@ -1,0 +1,40 @@
+<% provide :title, t('.title') %>
+<div id="user-login" class="page">
+  <h4><%=t :user_login_text1 %></h4>
+  <% if @current_user.is_unactivated? %>
+    <p><%=t :user_login_text2 %><%= link_to t(:user_login_text3), :action => "resend_confirmation" %><%=t :user_login_text4 %><%= h @current_user.email %>.</p>
+  <% else %>
+    <p>
+      <%=t :user_login_text5 %><%= h CONFIG["app_name"] %>.
+      <% unless @current_user.is_anonymous? %>
+        <%=t :user_login_text6 %><%= link_to t(:user_login_text7), :action => "reset_password" %><%=t :user_login_text8 %>
+      <% end %>
+      <% if @current_user.is_anonymous? %>
+        <% if CONFIG["enable_signups"] %>
+          <%=t :user_login_text9 %><%= link_to t(:user_login_text10), :action => "signup" %>.
+        <% else %>
+          <%=t :user_login_text11 %>
+        <% end %>
+      <% end %>
+    </p>
+  <% end %>
+
+  <%= form_tag({:action => "authenticate"}) do %>
+    <%= hidden_field_tag "url", params[:url] %>
+    <table class="form">
+      <tr>
+        <th width="15%"><label class="block" for="user_name"><%=t :layout_name %></label></th>
+        <td width="85%"><%= text_field "user", "name", :tabindex => 1 %></td>
+      </tr>
+      <tr>
+        <th><label class="block" for="user_password"><%=t :layout_password %></label></th>
+        <td><%= password_field "user", "password", :tabindex => 1 %></td>
+      </tr>
+      <tr>
+        <td colspan="2"><%= submit_tag t(:layout_login), :tabindex => 1 %></td>
+      </tr>
+    </table>
+  <% end %>
+</div>
+
+<%= render :partial => "footer" %>

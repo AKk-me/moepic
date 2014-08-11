@@ -1,9 +1,0 @@
-<% if user.tag_subscriptions.empty? %>
-  <%=t :sub_none %>
-<% else %>
-  <%= tag_subscription_listing(user) %>
-<% end %>
-
-<% if @current_user.id == user.id %>
-  (<%= link_to t(:sub_edit), :controller => "tag_subscription", :action => "index" %>)
-<% end %>

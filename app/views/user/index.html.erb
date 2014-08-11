@@ -1,0 +1,71 @@
+<% provide :title, t('.title') %>
+<h2><%=t :users %></h2>
+
+<%= form_tag({:action => "index"}, :method => :get) do %>
+  <table>
+    <tfoot>
+      <tr>
+        <td colspan="2"><%= submit_tag t(:users_search) %></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      <tr>
+        <th><%=t :users_name %></th>
+        <td><%= text_field_tag "name", params[:name] %></td>
+      </tr>
+      <tr>
+        <th><%=t :users_level %></th>
+        <td><%= select_tag "level", options_for_select([["Any", "any"], *CONFIG["user_levels"].to_a], params[:level]) %></td>
+      </tr>
+      <tr>
+        <th><%=t :users_order %></th>
+        <td><%= select_tag "order", options_for_select([["Name", "name"], ["Posts", "posts"], ["Notes", "notes"], ["Date", "date"]], params[:order]) %></td>
+      </tr>
+    </tbody>
+  </table>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th><%=t :users_name %></th>
+      <th><%=t :users_posts %></th>
+      <th><%=t :users_deleted %></th>
+      <th><%=t :users_pos %></th>
+      <th><%=t :users_neg %></th>
+      <th><%=t :users_notes %></th>
+      <th><%=t :users_level %></th>
+      <th><%=t :users_joined %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |user| %>
+      <tr class="<%= cycle 'even', 'odd' %>">
+        <td>
+          <%= link_to h(user.pretty_name), :action => "show", :id => user.id %>
+          <% if user.invited_by %>
+            &larr; <%= link_to h(user.invited_by_name), :action => "show", :id => user.invited_by %>
+          <% end %>
+        </td>
+        <td><%= link_to user.post_count, :controller => "post", :action => "index", :tags => "user:#{user.name}" %></td>
+        <td><%= Post.count(:conditions => "user_id = #{user.id} and status = 'deleted'") %></td>
+        <% if user.post_count > 100 %>
+          <td><%= number_to_percentage(100 * Post.count(:conditions => ["user_id = #{user.id} and status = 'active' and score > 1"]).to_f / user.post_count, :precision => 0) %></td>
+          <td><%= number_to_percentage(100 * Post.count(:conditions => ["user_id = #{user.id} and status = 'active' and score < -1"]).to_f / user.post_count, :precision => 0) %></td>
+        <% else %>
+          <td></td>
+          <td></td>
+        <% end %>
+        <td><%= link_to NoteVersion.count(:conditions => "user_id = #{user.id}"), :controller => "note", :action => "history", :user_id => user.id %></td>
+        <td><%= user.pretty_level %></td>
+        <td><span title="<%= user.created_at %>"><%= t('time.x_ago', :t => time_ago_in_words(user.created_at)) %></span></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div id="paginator">
+  <%= will_paginate(@users) %>
+</div>
+
+<%= render :partial => "footer" %>

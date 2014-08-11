@@ -1,0 +1,66 @@
+<% provide :title, t('.title') %>
+<div id="comment-list">
+  <% if @posts.empty? %>
+    <h4><%= t('.empty') %></h4>
+  <% end %>
+
+  <% @posts.each do |post| %>
+    <div class="post">
+      <div class="col1">
+        <%= link_to(image_tag(post.preview_url, :title => post.cached_tags, :class => "preview javascript-hide", :id => "p%i" % post.id, :width => post.preview_dimensions[0], :height => post.preview_dimensions[1]), :controller => "post", :action => "show", :id => post.id) %>&nbsp;
+      </div>
+      <div class="col2" id="comments-for-p<%= post.id %>">
+        <div class="header">
+          <div>
+            <span class="info"><strong><%= t('.date') %></strong> <%= compact_time(post.created_at) %></span>
+            <span class="info"><strong><%= t('.user') %></strong> <%= link_to h(post.author), :controller => "user", :action => "show", :id => post.user_id %></span>
+            <span class="info"><strong><%= t('ratings._') %></strong> <%= post.pretty_rating %></span>
+            <span class="info vote-container"><strong><%= t('.score') %></strong>
+              <span id="post-score-<%= post.id %>"><%= post.score %></span>
+              <%= vote_widget(@current_user) %>
+              <%= vote_tooltip_widget() %>
+            </span>
+
+            <% if post.comments.size > 6 %>
+              <span class="info"><strong><%= t('.hidden') %></strong> <%= link_to post.comments.size - 6, :controller => "post", :action => "show", :id => post.id %></span>
+            <% end %>
+          </div>
+          <div class="tags">
+            <strong><%= t('.tags') %></strong>
+            <% post.cached_tags.split(/ /).each do |name| %>
+              <span class="tag-type-<%= Tag.type_name(name) %>">
+                <%= link_to name.tr('_', ' '), :controller => '/post', :action => :index, :tags => name %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+        <%= render :partial => "comments", :locals => {:comments => post.recent_comments, :post_id => post.id, :hide => true} %>
+      </div>
+    </div>
+  <% end %>
+
+  <div id="paginator">
+    <%= will_paginate(@posts) %>
+  </div>
+
+  <% if @page_uses_translations then %>
+    <% content_for :above_footer do %>
+      <%= t('.translation_html', :p => link_to('Google', 'http://translate.google.com')) %>
+      <br>
+    <% end %>
+  <% end %>
+
+  <script type="text/javascript">
+    Post.register_resp(<%= json_escape Post.batch_api_data(@posts).to_json.html_safe %>);
+    jQuery(function ($) {
+      var scores = <%= @posts.reduce({}) { |h,p| h[p.id] = p.score; h }.to_json.html_safe %>
+      for (var id in scores) {
+        var vote = new Vote($('#comments-for-p'+id), id);
+        vote.updateWidget(Post.votes.get(id), scores[id]);
+      }
+    });
+    Post.init_blacklisted({replace: true})
+  </script>
+
+  <%= render :partial => "footer" %>
+</div>

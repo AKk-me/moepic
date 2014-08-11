@@ -1,0 +1,37 @@
+<% provide :title, t('.title', :name => @pool.pretty_name) %>
+<h4><%= t('.title', :name => @pool.pretty_name) %></h4>
+
+<p><%= t('.info') %></p>
+
+<div style="margin-bottom: 1em;">
+  <%= form_remote_tag(:url => {:action => "import", :format => "js"}, :method => :get) do %>
+    <%= text_field_tag "query", params[:query], :size => 50 %> <%= submit_tag t('.search') %>
+  <% end %>
+</div>
+
+<div>
+  <ul id="post-list-posts">
+  <%= form_tag(:action => "import") do %>
+    <%= hidden_field_tag "id", @pool.id %>
+
+    <div id="posts">
+    </div>
+
+    <div style="clear: both;">
+      <%= submit_tag t('.import') %> <%= button_to_function t('buttons.cancel'), "history.back()" %>
+    </div>
+  <% end %>
+  </ul>
+</div>
+
+<script type="text/javascript">
+  function removePost(id) {
+    if ($("delete-mode").checked) {
+      $("posts_" + id).remove()
+      $("p" + id).remove()
+      return false;
+    } else {
+      return true;
+    }
+  }
+</script>

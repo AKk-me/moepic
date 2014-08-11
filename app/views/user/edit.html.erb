@@ -1,0 +1,105 @@
+<% provide :title, t('.title') %>
+<h1><%= t('.title') %></h1>
+<div id="user-edit">
+  <%= form_tag(:controller => "user", :action => "update") do %>
+    <table class="form">
+      <tfoot>
+        <tr>
+          <td colspan="2">
+            <%= submit_tag t(:user_save) %> <%= submit_tag t(:user_cancel) %>
+          </td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <tr>
+          <th width="15%">
+            <label class="block" for="user_blacklisted_tags"><%=t :user1 %></label>
+            <p><%=t :user2 %></p>
+          </th>
+          <td width="85%">
+            <%= text_area "user", "blacklisted_tags", :size => "80x6" %>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <%= t('.email') %>
+            <% if CONFIG["enable_account_email_activation"] %>
+              <p><%=t :user4 %></p>
+            <% else %>
+              <p><%=t :user5 %></p>
+            <% end %>
+          </th>
+          <td>
+            <%= @user.email.blank? ? t('.no_email') : @user.email %> (<%= link_to t('.update_email'), :action => :change_email %>)
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label class="block" for="user_tag_subscriptions_text"><%=t :user6 %></label>
+          </th>
+          <td class="large-text">
+            <%= render :partial => "tag_subscription/user_listing", :locals => {:user => @user} %>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label class="block" for="user_my_tags"><%=t :user7 %></label>
+            <p><%=t :user8 %><a href="/post/upload"><%=t :user9 %></a><%=t :user10 %></p>
+          </th>
+          <td>
+            <%= text_area "user", "my_tags", :size => "40x5" %>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label class="block" for="user_always_resize_images"><%=t :user11 %></label>
+            <p><%=t :user12 %></p>
+          </th>
+          <td>
+            <%= check_box "user", "always_resize_images" %>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label class="block" for="user_receive_dmails"><%=t :user13 %></label>
+            <p><%=t :user14 %></p>
+          </th>
+          <td>
+            <%= check_box "user", "receive_dmails" %>
+          </td>
+        </tr>
+        <% if CONFIG["image_samples"] && !CONFIG["force_image_samples"] %>
+        <tr>
+          <th>
+            <label class="block" for="user_show_samples"><%=t :user15 %></label>
+            <p><%=t :user16 %></p>
+          </th>
+          <td>
+            <%= check_box "user", "show_samples" %>
+          </td>
+        </tr>
+        <% end %>
+        <tr>
+          <th>
+            <label class="block" for="user_use_browser"><%=t :user17 %></label>
+            <p><%=t :user18 %></p>
+          </th>
+          <td>
+            <%= check_box "user", "use_browser" %>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label class="block" for="user_show_advanced_editing"><%=t :user19 %></label>
+            <p><%=t :user20 %></p>
+          </th>
+          <td>
+            <%= check_box "user", "show_advanced_editing" %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  <% end %>
+</div>
+
+<%= render :partial => "footer" %>

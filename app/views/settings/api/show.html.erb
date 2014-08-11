@@ -1,0 +1,11 @@
+<% provide :title, t('.title') %>
+<h1><%= t('.title') %></h1>
+<div>
+  <%= t('.info') %>: <%= @user.api_key %>
+</div>
+
+<div>
+  <%= form_tag settings_api_path, method: :put do %>
+    <%= submit_tag t('.reset') %>
+  <% end %>
+</div>

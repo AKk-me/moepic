@@ -1,0 +1,39 @@
+<%= form_tag(:action => "create") do %>
+  <%= hidden_field_tag "dmail[parent_id]", @dmail.parent_id || @dmail.id, :id => "dmail_parent_id" %>
+
+  <table width="100%">
+    <tfoot>
+      <tr>
+        <td></td>
+        <td><%= submit_tag t('.send') -%> <%= submit_tag t('.preview'), :id => 'dmail-preview', :name => 'preview', :type => 'button' -%></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><div style="width: 400px" id="dmail-preview-area"></div></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      <tr>
+        <th><label for="dmail_to_name"><%= t('.form.to') %></label></th>
+        <td>
+          <%= text_field "dmail", "to_name", :value => params[:to], :class => 'ac-user-name' %>
+        </td>
+      </tr>
+      <tr>
+        <th><label for="dmail_title"><%= t('.form.title') %></label></th>
+        <td><%= text_field "dmail", "title" %></td>
+      </tr>
+      <tr>
+        <th><label for="dmail_body"><%= t('.form.body') %></label></th>
+        <td><%= text_area "dmail", "body", :size => "50x25", :class => "default" %></td>
+      </tr>
+    </tbody>
+  </table>
+<% end %>
+<script type="text/javascript">
+  $('dmail-preview').observe('click', function(event) {
+    $('dmail-preview-area').innerHTML = '<em><%= t('.preview_loading') %></em>';
+    new Ajax.Updater('dmail-preview-area', '<%= escape_javascript url_for(:controller => :dmail, :action => :preview) %>', { method: "get", parameters: { body: $F('dmail_body') } });
+    event.stop(); //Stop the browser from actually going to href.
+  });
+</script>

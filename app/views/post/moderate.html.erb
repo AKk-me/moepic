@@ -1,0 +1,120 @@
+<% provide :title, t('.title') %>
+<form method="get" action="/post/moderate">
+  <%= text_field_tag "query", "", :size => 40 %>
+  <%= submit_tag t('buttons.search') %>
+</form>
+
+<script type="text/javascript">
+  function highlight_row(checkbox) {
+    var row = checkbox.parentNode.parentNode
+    if (row.original_class == null) {
+      row.original_class = row.className
+    }
+
+    if (checkbox.checked) {
+      row.className = "highlight"
+    } else {
+      row.className = row.original_class
+    }
+  }
+</script>
+
+<div style="margin-bottom: 2em;">
+  <h2><%= t('.pending') %></h2>
+  <%= form_tag url_for(:controller => "/post", :action => :moderate) do %>
+    <%= hidden_field_tag "reason", "" %>
+
+    <table width="100%">
+      <tfoot>
+        <tr>
+          <td colspan="3">
+            <%= button_to_function t('buttons.select.all'), "$$('.p').each(function (i) {i.checked = true; highlight_row(i)})" %>
+            <%= button_to_function t('buttons.select.invert'), "$$('.p').each(function (i) {i.checked = !i.checked; highlight_row(i)})" %>
+            <%= submit_tag t('buttons.approve') %>
+            <%= submit_tag t('buttons.delete'), :onclick => "var reason = prompt('#{t('.prompt_reason')}'); if (reason != null) {$('reason').value = reason; return true} else {return false}" %>
+          </td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <% @pending_posts.each do |p| %>
+          <tr class="<% if p.score > 2 %>good<% elsif p.score < -2 %>bad<% end %> <%= cycle 'even', 'odd' %>">
+            <td><input type="checkbox" class="p" name="ids[<%= p.id %>]" onclick="highlight_row(this)"></td>
+            <td><%= link_to image_tag(p.preview_url, :width => p.preview_dimensions[0], :height => p.preview_dimensions[1]), :controller => "post", :action => "show", :id => p.id %></td>
+            <td class="checkbox-cell">
+              <ul>
+                <li><%= t('.uploaded_by_when_html', :u => link_to(p.author, :controller => :user, :action => :show, :id => p.user_id), :t_ago => t('time.x_ago', :t => time_ago_in_words(p.created_at)), :mod => link_to(t('.mod'), :action => :moderate, :query => "user:#{p.author}")) %></li>
+                <li><%= t('.rating') %>: <%= p.pretty_rating %></li>
+                <% if p.parent_id %>
+                  <li><%= t('.parent') %>: <%= link_to p.parent_id, :action => "moderate", :query => "parent:#{p.parent_id}" %></li>
+                <% end %>
+                <li><%= t('.tags') %>: <%= h p.cached_tags %></li>
+                <li><%= t('.score') %>: <span id="post-score-<%= p.id %>"><%= p.score %></span></li>
+                <% if p.flag_detail %>
+                <li>
+                  <%= t('.reason') %>: <%= h p.flag_detail.reason %> (<%- if p.flag_detail.user_id.nil? -%>automatic flag<% else %><%= link_to h(p.flag_detail.author), :controller => "user", :action => "show", :id => p.flag_detail.user_id %><% end %>)
+                </li>
+                <% end %>
+                <li><%= t('.size') %>: <%= number_to_human_size(p.file_size) %>, <%= p.width %>x<%= p.height %></li>
+              </ul>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>
+
+<div>
+  <h2><%= t('.flagged') %></h2>
+  <%= form_tag url_for(:controller => "/post", :action => :moderate) do %>
+    <%= hidden_field_tag "reason2", "" %>
+
+    <table width="100%">
+      <tfoot>
+        <tr>
+          <td colspan="3">
+            <%= button_to_function t('buttons.select.all'), "$$('.f').each(function (i) {i.checked = true; highlight_row(i)})" %>
+            <%= button_to_function t('buttons.select.invert'), "$$('.f').each(function (i) {i.checked = !i.checked; highlight_row(i)})" %>
+            <%= submit_tag t('buttons.approve') %>
+            <%= submit_tag t('buttons.delete'), :onclick => "var reason = prompt('#{t('.prompt_reason')}'); if (reason != null) {$('reason2').value = reason; return true} else {return false}" %>
+          </td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <% @flagged_posts.each do |p| %>
+          <tr class="<%= cycle 'even', 'odd' %>">
+            <td><input type="checkbox" class="f" name="ids[<%= p.id %>]" onclick="highlight_row(this)"></td>
+            <td><%= link_to image_tag(p.preview_url, :width => p.preview_dimensions[0], :height => p.preview_dimensions[1]), :controller => "post", :action => "show", :id => p.id %></td>
+            <td class="checkbox-cell">
+              <ul>
+                <li><%= t('.uploaded_by_when_html', :u => link_to(p.author, :controller => :user, :action => :show, :id => p.user_id), :t_ago => t('time.x_ago', :t => time_ago_in_words(p.created_at)), :mod => link_to(t('.mod'), :action => :moderate, :query => "user:#{p.author}")) %></li>
+                <li><%= t('.rating') %>: <%= p.pretty_rating %></li>
+                <% if p.parent_id %>
+                  <li><%= t('.parent') %>: <%= link_to p.parent_id, :action => "moderate", :query => "parent:#{p.parent_id}" %></li>
+                <% end %>
+                <li><%= t('.tags') %>: <%= h p.cached_tags %></li>
+                <li><%= t('.score') %>: <%= p.score %> (<%= t('.vote_down_html', :down => link_to_function(t('.down'), "Post.vote(-1, #{p.id}, {})")) %>)</li>
+                <% if p.flag_detail %>
+                <li>
+                  <%= t('.reason') %>: <%= h p.flag_detail.reason %> (<%- if p.flag_detail.user_id.nil? -%>automatic flag<% else %><%= link_to h(p.flag_detail.author), :controller => "user", :action => "show", :id => p.flag_detail.user_id %><% end %>)
+                </li>
+                <% end %>
+                <li><%= t('.size') %>: <%= number_to_human_size(p.file_size) %>, <%= p.width %>x<%= p.height %></li>
+              </ul>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <script type="text/javascript">
+    var cells = $$(".checkbox-cell")
+    $$(".checkbox-cell").invoke("observe", "click", function(e) {this.up().firstDescendant().down("input").click()})
+    <% (@pending_posts + @flagged_posts).uniq.each do |post| %>
+      Post.register(<%= json_escape post.to_json.html_safe %>)
+    <% end %>
+  </script>
+</div>
+
+<%= render :partial => "footer" %>

@@ -1,4 +1,0 @@
-moepic
-======
-
-moebooru
